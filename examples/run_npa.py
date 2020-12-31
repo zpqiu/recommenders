@@ -29,7 +29,7 @@ MIND_type = 'large'
 data_path = "./test_mind"
 
 train_news_file = os.path.join(data_path, 'train', r'news.tsv')
-train_behaviors_file = os.path.join(data_path, 'train', r'behaviors.small.tsv')
+train_behaviors_file = os.path.join(data_path, 'train', r'behaviors.tsv')
 valid_news_file = os.path.join(data_path, 'valid', r'news.tsv')
 fast_valid_behaviors_file = os.path.join(data_path, 'valid', r'behaviors.small.tsv')
 wordEmb_file = os.path.join(data_path, "utils", "embedding.npy")
