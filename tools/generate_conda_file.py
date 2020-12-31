@@ -57,7 +57,6 @@ CONDA_BASE = {
 CONDA_PYSPARK = {"pyarrow": "pyarrow>=0.8.0", "pyspark": "pyspark==2.4.5"}
 
 CONDA_GPU = {
-    "fastai": "fastai==1.0.46",
     "numba": "numba>=0.38.1",
     "pytorch": "pytorch>=1.0.0",
     "cudatoolkit": "cudatoolkit=10.0",
@@ -85,8 +84,8 @@ PIP_GPU = {
 }
 PIP_PYSPARK = {"databricks-cli": "databricks-cli==0.8.6"}
 
-PIP_DARWIN = {"nni": "nni==1.5"}
-PIP_LINUX = {"nni": "nni==1.5"}
+PIP_DARWIN = {}
+PIP_LINUX = {}
 PIP_WIN32 = {}
 
 
