@@ -75,7 +75,7 @@ def test(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--vt". type=str, default="valid")
+    parser.add_argument("--vt", type=str, default="valid")
     parser.add_argument("--ep", type=int, default=1,
                         help="Test epoch. Default 1.")
     parser.add_argument("--fsplit", type=str, default="p0",
