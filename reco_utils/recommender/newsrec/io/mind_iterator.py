@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-
+from tqdm import tqdm
 import tensorflow as tf
 import numpy as np
 import pickle
@@ -195,7 +195,7 @@ class MINDIterator(BaseIterator):
                     click_title_index,
                 )
 
-    def load_data_from_file(self, news_file, behavior_file):
+    def load_data_from_file(self, news_file, behavior_file, tdqm_desc=""):
         """Read and parse data from news file and behavior file.
         
         Args:
@@ -207,9 +207,11 @@ class MINDIterator(BaseIterator):
         """
 
         if not hasattr(self, "news_title_index"):
+            print("[Iterator] Init news")
             self.init_news(news_file)
 
         if not hasattr(self, "impr_indexes"):
+            print("[Iterator] Init behaviors")
             self.init_behaviors(behavior_file)
 
         label_list = []
@@ -220,12 +222,11 @@ class MINDIterator(BaseIterator):
         cnt = 0
 
         indexes = np.arange(len(self.labels))
-        print("[Iterator/Data] Total preprocess step: {}".format(len(indexes) // self.batch_size))
 
         if self.npratio > 0:
             np.random.shuffle(indexes)
 
-        for index in indexes:
+        for index in tqdm(indexes, total=len(indexes), desc="[Iterator/Data] {}".format(tdqm_desc)):
             for (
                 label,
                 imp_index,
@@ -300,7 +301,7 @@ class MINDIterator(BaseIterator):
             "labels": labels,
         }
 
-    def load_user_from_file(self, news_file, behavior_file):
+    def load_user_from_file(self, news_file, behavior_file, tdqm_desc="Loading User"):
         """Read and parse user data from news file and behavior file.
         
         Args:
@@ -312,20 +313,19 @@ class MINDIterator(BaseIterator):
         """
 
         if not hasattr(self, "news_title_index"):
-            print("[Iterator] Init news")
+            print("[Iterator/User] Init news")
             self.init_news(news_file)
 
         if not hasattr(self, "impr_indexes"):
-            print("[Iterator] Init behaviors")
+            print("[Iterator/User] Init behaviors")
             self.init_behaviors(behavior_file)
 
         user_indexes = []
         impr_indexes = []
         click_title_indexes = []
         cnt = 0
-        print("[Iterator/User] Total preprocess step: {}".format(len(self.impr_indexes) // self.batch_size))
 
-        for index in range(len(self.impr_indexes)):
+        for index in tqdm(range(len(self.impr_indexes)), total=len(self.impr_indexes), desc="[Iterator/User] {}".format(tdqm_desc)):
             click_title_indexes.append(self.news_title_index[self.histories[index]])
             user_indexes.append(self.uindexes[index])
             impr_indexes.append(self.impr_indexes[index])
@@ -378,6 +378,7 @@ class MINDIterator(BaseIterator):
             obj: An iterator that will yields parsed news feature, in the format of dict.
         """
         if not hasattr(self, "news_title_index"):
+            print("[Iterator/News] Init news")
             self.init_news(news_file)
 
         news_indexes = []
@@ -425,7 +426,7 @@ class MINDIterator(BaseIterator):
             "candidate_title_batch": candidate_title_index_batch,
         }
 
-    def load_impression_from_file(self, behaivors_file):
+    def load_impression_from_file(self, behaivors_file, tdqm_desc="Loading Impr"):
         """Read and parse impression data from behaivors file.
         
         Args:
@@ -436,12 +437,12 @@ class MINDIterator(BaseIterator):
         """
 
         if not hasattr(self, "histories"):
+            print("[Iterator/Impr] Init behaviors")
             self.init_behaviors(behaivors_file)
 
         indexes = np.arange(len(self.labels))
-        print("[Iterator/Impr] Total preprocess step: {}".format(len(indexes)))
 
-        for index in indexes:
+        for index in tqdm(indexes, total=len(indexes), desc="[Iterator/Impr] {}".format(tdqm_desc)):
             impr_label = np.array(self.labels[index], dtype="int32")
             impr_news = np.array(self.imprs[index], dtype="int32")
 

@@ -208,26 +208,21 @@ class BaseModel:
             epoch_loss = 0
             train_start = time.time()
 
-            tqdm_util = tqdm(
-                self.train_iterator.load_data_from_file(
-                    train_news_file, train_behaviors_file
-                ),
-                desc="Loading Train"
-            )
-
-            for batch_data_input in tqdm_util:
+            for batch_data_input in self.train_iterator.load_data_from_file(
+                    train_news_file, train_behaviors_file, tqdm_desc="Train"
+                ):
 
                 step_result = self.train(batch_data_input)
                 step_data_loss = step_result
 
                 epoch_loss += step_data_loss
                 step += 1
-                if step % self.hparams.show_step == 0:
-                    tqdm_util.set_description(
-                        "[Train] step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}".format(
-                            step, epoch_loss / step, step_data_loss
-                        )
-                    )
+                # if step % self.hparams.show_step == 0:
+                #     tqdm_util.set_description(
+                #         "[Train] step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}".format(
+                #             step, epoch_loss / step, step_data_loss
+                #         )
+                #     )
 
             train_end = time.time()
             train_time = train_end - train_start
@@ -362,10 +357,7 @@ class BaseModel:
 
         user_indexes = []
         user_vecs = []
-        for batch_data_input in tqdm(
-            self.test_iterator.load_user_from_file(news_filename, behaviors_file),
-            desc="Loading Eval"
-        ):
+        for batch_data_input in self.test_iterator.load_user_from_file(news_filename, behaviors_file, tdqm_desc="Eval"):
             user_index, user_vec = self.user(batch_data_input)
             user_indexes.extend(np.reshape(user_index, -1))
             user_vecs.extend(user_vec)
@@ -395,10 +387,7 @@ class BaseModel:
 
         cnt = 0
 
-        for batch_data_input in tqdm(
-            self.test_iterator.load_data_from_file(news_filename, behaviors_file),
-            desc="Eval"
-        ):
+        for batch_data_input in self.test_iterator.load_data_from_file(news_filename, behaviors_file, tdqm_desc="Eval"):
             if go_fast and cnt >= 44000:
                 break
             cnt += 1
@@ -431,7 +420,7 @@ class BaseModel:
             news_index,
             user_index,
             label,
-        ) in tqdm(self.test_iterator.load_impression_from_file(behaviors_file), desc="Eval"):
+        ) in self.test_iterator.load_impression_from_file(behaviors_file, tdqm_desc="Eval"):
             if go_fast and cnt >= 3764:
                 break
             cnt += 1
