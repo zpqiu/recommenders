@@ -12,15 +12,14 @@ from reco_utils.recommender.newsrec.newsrec_utils import prepare_hparams
 from reco_utils.recommender.newsrec.models.npa import NPAModel
 from reco_utils.recommender.newsrec.io.mind_iterator import MINDIterator
 from reco_utils.recommender.newsrec.newsrec_utils import get_mind_data_set
-from tempfile import TemporaryDirectory
-import tensorflow as tf
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+
+import tensorflow as tf
+
 
 print("System version: {}".format(sys.version))
 print("Tensorflow version: {}".format(tf.__version__))
-
-# tmpdir = TemporaryDirectory()
-# print(tmpdir)
 
 epochs = 10
 seed = 42
