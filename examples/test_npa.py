@@ -27,7 +27,6 @@ MIND_type = 'large'
 
 data_path = "./test_mind"
 
-test_news_file = os.path.join(data_path, 'test', r'news.tsv')
 wordEmb_file = os.path.join(data_path, "utils", "embedding.npy")
 userDict_file = os.path.join(data_path, "utils", "uid2index.pkl")
 wordDict_file = os.path.join(data_path, "utils", "word_dict.pkl")
@@ -41,15 +40,32 @@ hparams = prepare_hparams(yaml_file, wordEmb_file=wordEmb_file, \
                           show_step=10)
 
 
+def dist_eval(args):
+    iterator = MINDIterator
+    model = NPAModel(hparams, iterator, seed=seed)
+    model.model.load_weights(os.path.join(model_dir, "ckpt_ep{}".format(args.ep)))
+    test_news_file = os.path.join(data_path, "valid", 'news.tsv')
+    test_behaviors_file = os.path.join(data_path, "valid", 'behaviors.{}.tsv'.format(args.fsplit))
+
+    group_impr_indexes, group_labels, group_preds = model.run_slow_eval(test_news_file, test_behaviors_file)
+
+    with open(os.path.join(data_path, 'results/npa-valid-prediction.{}.txt'.format(args.fsplit)), 'w') as f:
+        for labels, preds in tqdm(zip(group_labels, group_preds)):
+            label_str = ",".join([str(x) for x in labels])
+            pred_str = ",".join([str(x) for x in preds])
+            f.write("{}\t{}\n".format(label_str, pred_str))
+
+
 def test(args):
     iterator = MINDIterator
     model = NPAModel(hparams, iterator, seed=seed, test_mode=True)
     model.model.load_weights(os.path.join(model_dir, "ckpt_ep{}".format(args.ep)))
-    test_behaviors_file = os.path.join(data_path, 'test', 'behaviors.{}.tsv'.format(args.fsplit))
+    test_news_file = os.path.join(data_path, "test", 'news.tsv')
+    test_behaviors_file = os.path.join(data_path, "test", 'behaviors.{}.tsv'.format(args.fsplit))
 
     group_impr_indexes, group_labels, group_preds = model.run_slow_eval(test_news_file, test_behaviors_file)
 
-    with open(os.path.join(data_path, 'prediction.{}.txt'.format(args.split)), 'w') as f:
+    with open(os.path.join(data_path, 'results/npa-test-prediction.{}.txt'.format(args.fsplit)), 'w') as f:
         for impr_index, preds in tqdm(zip(group_impr_indexes, group_preds)):
             impr_index += 1
             pred_rank = (np.argsort(np.argsort(preds)[::-1]) + 1).tolist()
@@ -59,10 +75,14 @@ def test(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument("--vt". type=str, default="valid")
     parser.add_argument("--ep", type=int, default=1,
                         help="Test epoch. Default 1.")
     parser.add_argument("--fsplit", type=str, default="p0",
                         help="Test epoch. Default p0.")
     args = parser.parse_args()
 
-    test(args)
+    if args.vt == "test":
+        test(args)
+    else:
+        dist_eval(args)
