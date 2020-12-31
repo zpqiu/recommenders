@@ -36,6 +36,7 @@ wordEmb_file = os.path.join(data_path, "utils", "embedding.npy")
 userDict_file = os.path.join(data_path, "utils", "uid2index.pkl")
 wordDict_file = os.path.join(data_path, "utils", "word_dict.pkl")
 yaml_file = os.path.join(data_path, "utils", r'nrms.yaml')
+model_dir = os.path.join(data_path, "npa")
 
 mind_url, mind_train_dataset, mind_dev_dataset, mind_utils = get_mind_data_set(MIND_type)
 
@@ -58,10 +59,10 @@ print(hparams)
 iterator = MINDIterator
 model = NPAModel(hparams, iterator, seed=seed)
 
-print(model.run_eval(valid_news_file, valid_behaviors_file))
+print(model.run_eval(valid_news_file, valid_behaviors_file, go_fast=True))
 
-model.fit(train_news_file, train_behaviors_file, valid_news_file, valid_behaviors_file)
+model.fit(train_news_file, train_behaviors_file, valid_news_file, valid_behaviors_file, model_save_path=model_dir)
 
-res_syn = model.run_eval(valid_news_file, valid_behaviors_file)
-print(res_syn)
+# res_syn = model.run_eval(valid_news_file, valid_behaviors_file)
+# print(res_syn)
 

@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 from os.path import join
+import os
 import abc
 import time
 import numpy as np
@@ -187,6 +188,7 @@ class BaseModel:
         valid_behaviors_file,
         test_news_file=None,
         test_behaviors_file=None,
+        model_save_path=None
     ):
         """Fit the model with train_file. Evaluate the model on valid_file per epoch to observe the training status.
         If test_news_file is not None, evaluate it too.
@@ -280,6 +282,11 @@ class BaseModel:
                 )
             )
 
+            model_path = os.path.join(model_save_path)
+            os.makedirs(model_path, exist_ok=True)
+
+            self.model.save_weights(os.path.join(model_path, "ckpt_ep{}".format(epoch)))
+
         return self
 
     def group_labels(self, labels, preds, group_keys):
@@ -313,7 +320,7 @@ class BaseModel:
 
         return all_keys, all_labels, all_preds
 
-    def run_eval(self, news_filename, behaviors_file):
+    def run_eval(self, news_filename, behaviors_file, go_fast=False):
         """Evaluate the given file and returns some evaluation metrics.
 
         Args:
@@ -325,11 +332,11 @@ class BaseModel:
 
         if self.support_quick_scoring:
             _, group_labels, group_preds = self.run_fast_eval(
-                news_filename, behaviors_file
+                news_filename, behaviors_file, go_fast
             )
         else:
             _, group_labels, group_preds = self.run_slow_eval(
-                news_filename, behaviors_file
+                news_filename, behaviors_file, go_fast
             )
         res = cal_metric(group_labels, group_preds, self.hparams.metrics)
         return res
@@ -378,14 +385,20 @@ class BaseModel:
 
         return dict(zip(news_indexes, news_vecs))
 
-    def run_slow_eval(self, news_filename, behaviors_file):
+    def run_slow_eval(self, news_filename, behaviors_file, go_fast=False):
         preds = []
         labels = []
         imp_indexes = []
 
+        cnt = 0
+
         for batch_data_input in tqdm(
             self.test_iterator.load_data_from_file(news_filename, behaviors_file)
         ):
+            if go_fast and cnt >= 44000:
+                break
+            cnt += 1
+
             step_pred, step_labels, step_imp_index = self.eval(batch_data_input)
             preds.extend(np.reshape(step_pred, -1))
             labels.extend(np.reshape(step_labels, -1))
@@ -396,7 +409,7 @@ class BaseModel:
         )
         return group_impr_indexes, group_labels, group_preds
 
-    def run_fast_eval(self, news_filename, behaviors_file):
+    def run_fast_eval(self, news_filename, behaviors_file, go_fast=False):
         news_vecs = self.run_news(news_filename)
         user_vecs = self.run_user(news_filename, behaviors_file)
 
@@ -407,12 +420,18 @@ class BaseModel:
         group_labels = []
         group_preds = []
 
+        cnt = 0
+
         for (
             impr_index,
             news_index,
             user_index,
             label,
         ) in tqdm(self.test_iterator.load_impression_from_file(behaviors_file)):
+            if go_fast and cnt >= 3764:
+                break
+            cnt += 1
+
             pred = np.dot(
                 np.stack([news_vecs[i] for i in news_index], axis=0),
                 user_vecs[impr_index],
