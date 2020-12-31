@@ -27,7 +27,7 @@ class NRMSModel(BaseModel):
     """
 
     def __init__(
-        self, hparams, iterator_creator, seed=None,
+        self, hparams, iterator_creator, seed=None, test_mode=False
     ):
         """Initialization steps for NRMS.
         Compared with the BaseModel, NRMS need word embedding.
@@ -41,7 +41,7 @@ class NRMSModel(BaseModel):
         self.word2vec_embedding = self._init_embedding(hparams.wordEmb_file)
 
         super().__init__(
-            hparams, iterator_creator, seed=seed,
+            hparams, iterator_creator, seed=seed, test_mode=test_mode
         )
 
     def _get_input_label_from_iter(self, batch_data):
