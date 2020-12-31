@@ -195,7 +195,7 @@ class MINDIterator(BaseIterator):
                     click_title_index,
                 )
 
-    def load_data_from_file(self, news_file, behavior_file, tdqm_desc=""):
+    def load_data_from_file(self, news_file, behavior_file, tqdm_desc=""):
         """Read and parse data from news file and behavior file.
         
         Args:
@@ -226,7 +226,7 @@ class MINDIterator(BaseIterator):
         if self.npratio > 0:
             np.random.shuffle(indexes)
 
-        for index in tqdm(indexes, total=len(indexes), desc="[Iterator/Data] {}".format(tdqm_desc)):
+        for index in tqdm(indexes, total=len(indexes), desc="[Iterator/Data] {}".format(tqdm_desc)):
             for (
                 label,
                 imp_index,
@@ -301,7 +301,7 @@ class MINDIterator(BaseIterator):
             "labels": labels,
         }
 
-    def load_user_from_file(self, news_file, behavior_file, tdqm_desc="Loading User"):
+    def load_user_from_file(self, news_file, behavior_file, tqdm_desc="Loading User"):
         """Read and parse user data from news file and behavior file.
         
         Args:
@@ -325,7 +325,7 @@ class MINDIterator(BaseIterator):
         click_title_indexes = []
         cnt = 0
 
-        for index in tqdm(range(len(self.impr_indexes)), total=len(self.impr_indexes), desc="[Iterator/User] {}".format(tdqm_desc)):
+        for index in tqdm(range(len(self.impr_indexes)), total=len(self.impr_indexes), desc="[Iterator/User] {}".format(tqdm_desc)):
             click_title_indexes.append(self.news_title_index[self.histories[index]])
             user_indexes.append(self.uindexes[index])
             impr_indexes.append(self.impr_indexes[index])
@@ -426,7 +426,7 @@ class MINDIterator(BaseIterator):
             "candidate_title_batch": candidate_title_index_batch,
         }
 
-    def load_impression_from_file(self, behaivors_file, tdqm_desc="Loading Impr"):
+    def load_impression_from_file(self, behaivors_file, tqdm_desc="Loading Impr"):
         """Read and parse impression data from behaivors file.
         
         Args:
@@ -442,7 +442,7 @@ class MINDIterator(BaseIterator):
 
         indexes = np.arange(len(self.labels))
 
-        for index in tqdm(indexes, total=len(indexes), desc="[Iterator/Impr] {}".format(tdqm_desc)):
+        for index in tqdm(indexes, total=len(indexes), desc="[Iterator/Impr] {}".format(tqdm_desc)):
             impr_label = np.array(self.labels[index], dtype="int32")
             impr_news = np.array(self.imprs[index], dtype="int32")
 

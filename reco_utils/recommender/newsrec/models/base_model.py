@@ -357,7 +357,7 @@ class BaseModel:
 
         user_indexes = []
         user_vecs = []
-        for batch_data_input in self.test_iterator.load_user_from_file(news_filename, behaviors_file, tdqm_desc="Eval"):
+        for batch_data_input in self.test_iterator.load_user_from_file(news_filename, behaviors_file, tqdm_desc="Eval"):
             user_index, user_vec = self.user(batch_data_input)
             user_indexes.extend(np.reshape(user_index, -1))
             user_vecs.extend(user_vec)
@@ -387,7 +387,7 @@ class BaseModel:
 
         cnt = 0
 
-        for batch_data_input in self.test_iterator.load_data_from_file(news_filename, behaviors_file, tdqm_desc="Eval"):
+        for batch_data_input in self.test_iterator.load_data_from_file(news_filename, behaviors_file, tqdm_desc="Eval"):
             if go_fast and cnt >= 44000:
                 break
             cnt += 1
@@ -420,7 +420,7 @@ class BaseModel:
             news_index,
             user_index,
             label,
-        ) in self.test_iterator.load_impression_from_file(behaviors_file, tdqm_desc="Eval"):
+        ) in self.test_iterator.load_impression_from_file(behaviors_file, tqdm_desc="Eval"):
             if go_fast and cnt >= 3764:
                 break
             cnt += 1
