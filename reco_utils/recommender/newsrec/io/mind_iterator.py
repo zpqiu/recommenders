@@ -311,15 +311,18 @@ class MINDIterator(BaseIterator):
         """
 
         if not hasattr(self, "news_title_index"):
+            print("[Iterator] Init news")
             self.init_news(news_file)
 
         if not hasattr(self, "impr_indexes"):
+            print("[Iterator] Init behaviors")
             self.init_behaviors(behavior_file)
 
         user_indexes = []
         impr_indexes = []
         click_title_indexes = []
         cnt = 0
+        print("[Iterator] Total preprocess step: {}".format(len(self.impr_indexes) // self.batch_size))
 
         for index in range(len(self.impr_indexes)):
             click_title_indexes.append(self.news_title_index[self.histories[index]])
