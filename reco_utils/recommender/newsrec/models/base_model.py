@@ -31,6 +31,7 @@ class BaseModel:
         hparams,
         iterator_creator,
         seed=None,
+        test_mode=False
     ):
         """Initializing the model. Create common logics which are needed by all deeprec models, such as loss function,
         parameter set.
@@ -50,10 +51,12 @@ class BaseModel:
             hparams,
             hparams.npratio,
             col_spliter="\t",
+            test_mode=test_mode
         )
         self.test_iterator = iterator_creator(
             hparams,
             col_spliter="\t",
+            test_mode=test_mode
         )
 
         self.hparams = hparams

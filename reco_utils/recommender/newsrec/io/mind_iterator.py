@@ -30,7 +30,7 @@ class MINDIterator(BaseIterator):
     """
 
     def __init__(
-        self, hparams, npratio=-1, col_spliter="\t", ID_spliter="%",
+        self, hparams, npratio=-1, col_spliter="\t", ID_spliter="%", test_mode=False
     ):
         """Initialize an iterator. Create necessary placeholders for the model.
         
@@ -46,6 +46,7 @@ class MINDIterator(BaseIterator):
         self.title_size = hparams.title_size
         self.his_size = hparams.his_size
         self.npratio = npratio
+        self.test_mode = test_mode
 
         self.word_dict = self.load_dict(hparams.wordDict_file)
         self.uid2index = self.load_dict(hparams.userDict_file)
@@ -118,7 +119,10 @@ class MINDIterator(BaseIterator):
                 ]
 
                 impr_news = [self.nid2index[i.split("-")[0]] for i in impr.split()]
-                label = [int(i.split("-")[1]) for i in impr.split()]
+                if self.test_mode:
+                    label = [0 for _ in impr.split()]
+                else:
+                    label = [int(i.split("-")[1]) for i in impr.split()]
                 uindex = self.uid2index[uid] if uid in self.uid2index else 0
 
                 self.histories.append(history)
