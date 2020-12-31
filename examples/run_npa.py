@@ -35,7 +35,7 @@ valid_behaviors_file = os.path.join(data_path, 'valid', r'behaviors.tsv')
 wordEmb_file = os.path.join(data_path, "utils", "embedding.npy")
 userDict_file = os.path.join(data_path, "utils", "uid2index.pkl")
 wordDict_file = os.path.join(data_path, "utils", "word_dict.pkl")
-yaml_file = os.path.join(data_path, "utils", r'nrms.yaml')
+yaml_file = os.path.join(data_path, "utils", r'npa.yaml')
 model_dir = os.path.join(data_path, "npa")
 
 mind_url, mind_train_dataset, mind_dev_dataset, mind_utils = get_mind_data_set(MIND_type)
