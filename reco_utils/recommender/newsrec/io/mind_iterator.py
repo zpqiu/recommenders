@@ -220,6 +220,7 @@ class MINDIterator(BaseIterator):
         cnt = 0
 
         indexes = np.arange(len(self.labels))
+        print("[Iterator/Data] Total preprocess step: {}".format(len(indexes) // self.batch_size))
 
         if self.npratio > 0:
             np.random.shuffle(indexes)
@@ -322,7 +323,7 @@ class MINDIterator(BaseIterator):
         impr_indexes = []
         click_title_indexes = []
         cnt = 0
-        print("[Iterator] Total preprocess step: {}".format(len(self.impr_indexes) // self.batch_size))
+        print("[Iterator/User] Total preprocess step: {}".format(len(self.impr_indexes) // self.batch_size))
 
         for index in range(len(self.impr_indexes)):
             click_title_indexes.append(self.news_title_index[self.histories[index]])
@@ -438,6 +439,7 @@ class MINDIterator(BaseIterator):
             self.init_behaviors(behaivors_file)
 
         indexes = np.arange(len(self.labels))
+        print("[Iterator/Impr] Total preprocess step: {}".format(len(indexes)))
 
         for index in indexes:
             impr_label = np.array(self.labels[index], dtype="int32")

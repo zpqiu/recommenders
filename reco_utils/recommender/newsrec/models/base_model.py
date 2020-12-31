@@ -224,7 +224,7 @@ class BaseModel:
                 step += 1
                 if step % self.hparams.show_step == 0:
                     tqdm_util.set_description(
-                        "step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}".format(
+                        "[Train] step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}".format(
                             step, epoch_loss / step, step_data_loss
                         )
                     )
