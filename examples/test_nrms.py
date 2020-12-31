@@ -49,7 +49,7 @@ def dist_eval(args):
 
     group_impr_indexes, group_labels, group_preds = model.run_slow_eval(test_news_file, test_behaviors_file)
 
-    with open(os.path.join(data_path, 'results/nrms-valid-prediction.{}.txt'.format(args.split)), 'w') as f:
+    with open(os.path.join(data_path, 'results/nrms-valid-prediction.{}.txt'.format(args.fsplit)), 'w') as f:
         for labels, preds in tqdm(zip(group_labels, group_preds)):
             label_str = ",".join([str(x) for x in labels])
             pred_str = ",".join([str(x) for x in preds])
@@ -65,7 +65,7 @@ def test(args):
 
     group_impr_indexes, group_labels, group_preds = model.run_slow_eval(test_news_file, test_behaviors_file)
 
-    with open(os.path.join(data_path, 'results/nrms-test-prediction.{}.txt'.format(args.split)), 'w') as f:
+    with open(os.path.join(data_path, 'results/nrms-test-prediction.{}.txt'.format(args.fsplit)), 'w') as f:
         for impr_index, preds in tqdm(zip(group_impr_indexes, group_preds)):
             impr_index += 1
             pred_rank = (np.argsort(np.argsort(preds)[::-1]) + 1).tolist()
