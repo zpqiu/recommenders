@@ -370,10 +370,7 @@ class BaseModel:
 
         news_indexes = []
         news_vecs = []
-        for batch_data_input in tqdm(
-            self.test_iterator.load_news_from_file(news_filename),
-            desc="Loading Eval"
-        ):
+        for batch_data_input in self.test_iterator.load_news_from_file(news_filename, tqdm_desc="Eval"):
             news_index, news_vec = self.news(batch_data_input)
             news_indexes.extend(np.reshape(news_index, -1))
             news_vecs.extend(news_vec)
