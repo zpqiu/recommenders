@@ -31,6 +31,7 @@ class BaseModel:
         hparams,
         iterator_creator,
         seed=None,
+        test_mode=False
     ):
         """Initializing the model. Create common logics which are needed by all deeprec models, such as loss function,
         parameter set.
@@ -50,10 +51,12 @@ class BaseModel:
             hparams,
             hparams.npratio,
             col_spliter="\t",
+            test_mode=test_mode
         )
         self.test_iterator = iterator_creator(
             hparams,
             col_spliter="\t",
+            test_mode=test_mode
         )
 
         self.hparams = hparams
@@ -208,25 +211,21 @@ class BaseModel:
             epoch_loss = 0
             train_start = time.time()
 
-            tqdm_util = tqdm(
-                self.train_iterator.load_data_from_file(
-                    train_news_file, train_behaviors_file
-                )
-            )
-
-            for batch_data_input in tqdm_util:
+            for batch_data_input in self.train_iterator.load_data_from_file(
+                    train_news_file, train_behaviors_file, tqdm_desc="Train"
+                ):
 
                 step_result = self.train(batch_data_input)
                 step_data_loss = step_result
 
                 epoch_loss += step_data_loss
                 step += 1
-                if step % self.hparams.show_step == 0:
-                    tqdm_util.set_description(
-                        "step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}".format(
-                            step, epoch_loss / step, step_data_loss
-                        )
-                    )
+                # if step % self.hparams.show_step == 0:
+                #     tqdm_util.set_description(
+                #         "[Train] step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}".format(
+                #             step, epoch_loss / step, step_data_loss
+                #         )
+                #     )
 
             train_end = time.time()
             train_time = train_end - train_start
@@ -361,9 +360,7 @@ class BaseModel:
 
         user_indexes = []
         user_vecs = []
-        for batch_data_input in tqdm(
-            self.test_iterator.load_user_from_file(news_filename, behaviors_file)
-        ):
+        for batch_data_input in self.test_iterator.load_user_from_file(news_filename, behaviors_file, tqdm_desc="Eval"):
             user_index, user_vec = self.user(batch_data_input)
             user_indexes.extend(np.reshape(user_index, -1))
             user_vecs.extend(user_vec)
@@ -376,9 +373,7 @@ class BaseModel:
 
         news_indexes = []
         news_vecs = []
-        for batch_data_input in tqdm(
-            self.test_iterator.load_news_from_file(news_filename)
-        ):
+        for batch_data_input in self.test_iterator.load_news_from_file(news_filename, tqdm_desc="Eval"):
             news_index, news_vec = self.news(batch_data_input)
             news_indexes.extend(np.reshape(news_index, -1))
             news_vecs.extend(news_vec)
@@ -392,9 +387,7 @@ class BaseModel:
 
         cnt = 0
 
-        for batch_data_input in tqdm(
-            self.test_iterator.load_data_from_file(news_filename, behaviors_file)
-        ):
+        for batch_data_input in self.test_iterator.load_data_from_file(news_filename, behaviors_file, tqdm_desc="Eval"):
             if go_fast and cnt >= 44000:
                 break
             cnt += 1
@@ -427,7 +420,7 @@ class BaseModel:
             news_index,
             user_index,
             label,
-        ) in tqdm(self.test_iterator.load_impression_from_file(behaviors_file)):
+        ) in self.test_iterator.load_impression_from_file(behaviors_file, tqdm_desc="Eval"):
             if go_fast and cnt >= 3764:
                 break
             cnt += 1

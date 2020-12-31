@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-
+from tqdm import tqdm
 import tensorflow as tf
 import numpy as np
 import pickle
@@ -30,7 +30,7 @@ class MINDIterator(BaseIterator):
     """
 
     def __init__(
-        self, hparams, npratio=-1, col_spliter="\t", ID_spliter="%",
+        self, hparams, npratio=-1, col_spliter="\t", ID_spliter="%", test_mode=False
     ):
         """Initialize an iterator. Create necessary placeholders for the model.
         
@@ -46,6 +46,7 @@ class MINDIterator(BaseIterator):
         self.title_size = hparams.title_size
         self.his_size = hparams.his_size
         self.npratio = npratio
+        self.test_mode = test_mode
 
         self.word_dict = self.load_dict(hparams.wordDict_file)
         self.uid2index = self.load_dict(hparams.userDict_file)
@@ -61,7 +62,7 @@ class MINDIterator(BaseIterator):
         with open(file_path, "rb") as f:
             return pickle.load(f)
 
-    def init_news(self, news_file):
+    def init_news(self, news_file, tqdm_desc=""):
         """ init news information given news file, such as news_title_index and nid2index.
         Args:
             news_file: path of news file
@@ -71,7 +72,7 @@ class MINDIterator(BaseIterator):
         news_title = [""]
 
         with tf.io.gfile.GFile(news_file, "r") as rd:
-            for line in rd:
+            for line in tqdm(rd, desc="[Init News] {}".format(tqdm_desc)):
                 nid, vert, subvert, title, ab, url, _, _ = line.strip("\n").split(
                     self.col_spliter
                 )
@@ -95,7 +96,7 @@ class MINDIterator(BaseIterator):
                         title[word_index].lower()
                     ]
 
-    def init_behaviors(self, behaviors_file):
+    def init_behaviors(self, behaviors_file, tqdm_desc=""):
         """ init behavior logs given behaviors file.
 
         Args:
@@ -109,7 +110,7 @@ class MINDIterator(BaseIterator):
 
         with tf.io.gfile.GFile(behaviors_file, "r") as rd:
             impr_index = 0
-            for line in rd:
+            for line in tqdm(rd, desc="[Init Behavior] {}".format(tqdm_desc)):
                 uid, time, history, impr = line.strip("\n").split(self.col_spliter)[-4:]
 
                 history = [self.nid2index[i] for i in history.split()]
@@ -118,7 +119,10 @@ class MINDIterator(BaseIterator):
                 ]
 
                 impr_news = [self.nid2index[i.split("-")[0]] for i in impr.split()]
-                label = [int(i.split("-")[1]) for i in impr.split()]
+                if self.test_mode:
+                    label = [0 for _ in impr.split()]
+                else:
+                    label = [int(i.split("-")[1]) for i in impr.split()]
                 uindex = self.uid2index[uid] if uid in self.uid2index else 0
 
                 self.histories.append(history)
@@ -195,7 +199,7 @@ class MINDIterator(BaseIterator):
                     click_title_index,
                 )
 
-    def load_data_from_file(self, news_file, behavior_file):
+    def load_data_from_file(self, news_file, behavior_file, tqdm_desc=""):
         """Read and parse data from news file and behavior file.
         
         Args:
@@ -207,10 +211,12 @@ class MINDIterator(BaseIterator):
         """
 
         if not hasattr(self, "news_title_index"):
-            self.init_news(news_file)
+            # print("[Iterator] Init news")
+            self.init_news(news_file, tqdm_desc)
 
         if not hasattr(self, "impr_indexes"):
-            self.init_behaviors(behavior_file)
+            # print("[Iterator] Init behaviors")
+            self.init_behaviors(behavior_file, tqdm_desc)
 
         label_list = []
         imp_indexes = []
@@ -224,7 +230,7 @@ class MINDIterator(BaseIterator):
         if self.npratio > 0:
             np.random.shuffle(indexes)
 
-        for index in indexes:
+        for index in tqdm(indexes, total=len(indexes), desc="[Iterator/Data] {}".format(tqdm_desc)):
             for (
                 label,
                 imp_index,
@@ -299,7 +305,7 @@ class MINDIterator(BaseIterator):
             "labels": labels,
         }
 
-    def load_user_from_file(self, news_file, behavior_file):
+    def load_user_from_file(self, news_file, behavior_file, tqdm_desc="Loading User"):
         """Read and parse user data from news file and behavior file.
         
         Args:
@@ -311,17 +317,19 @@ class MINDIterator(BaseIterator):
         """
 
         if not hasattr(self, "news_title_index"):
-            self.init_news(news_file)
+            # print("[Iterator/User] Init news")
+            self.init_news(news_file, tqdm_desc)
 
         if not hasattr(self, "impr_indexes"):
-            self.init_behaviors(behavior_file)
+            # print("[Iterator/User] Init behaviors")
+            self.init_behaviors(behavior_file, tqdm_desc)
 
         user_indexes = []
         impr_indexes = []
         click_title_indexes = []
         cnt = 0
 
-        for index in range(len(self.impr_indexes)):
+        for index in tqdm(range(len(self.impr_indexes)), total=len(self.impr_indexes), desc="[Iterator/User] {}".format(tqdm_desc)):
             click_title_indexes.append(self.news_title_index[self.histories[index]])
             user_indexes.append(self.uindexes[index])
             impr_indexes.append(self.impr_indexes[index])
@@ -364,7 +372,7 @@ class MINDIterator(BaseIterator):
             "clicked_title_batch": click_title_index_batch,
         }
 
-    def load_news_from_file(self, news_file):
+    def load_news_from_file(self, news_file, tqdm_desc=""):
         """Read and parse user data from news file.
         
         Args:
@@ -374,13 +382,14 @@ class MINDIterator(BaseIterator):
             obj: An iterator that will yields parsed news feature, in the format of dict.
         """
         if not hasattr(self, "news_title_index"):
-            self.init_news(news_file)
+            # print("[Iterator/News] Init news")
+            self.init_news(news_file, tqdm_desc)
 
         news_indexes = []
         candidate_title_indexes = []
         cnt = 0
 
-        for index in range(len(self.news_title_index)):
+        for index in tqdm(range(len(self.news_title_index)), total=len(self.news_title_index), desc="[Iterator/News] {}".format(tqdm_desc)):
             news_indexes.append(index)
             candidate_title_indexes.append(self.news_title_index[index])
 
@@ -421,7 +430,7 @@ class MINDIterator(BaseIterator):
             "candidate_title_batch": candidate_title_index_batch,
         }
 
-    def load_impression_from_file(self, behaivors_file):
+    def load_impression_from_file(self, behaivors_file, tqdm_desc="Loading Impr"):
         """Read and parse impression data from behaivors file.
         
         Args:
@@ -432,11 +441,12 @@ class MINDIterator(BaseIterator):
         """
 
         if not hasattr(self, "histories"):
-            self.init_behaviors(behaivors_file)
+            # print("[Iterator/Impr] Init behaviors")
+            self.init_behaviors(behaivors_file, tqdm_desc)
 
         indexes = np.arange(len(self.labels))
 
-        for index in indexes:
+        for index in tqdm(indexes, total=len(indexes), desc="[Iterator/Impr] {}".format(tqdm_desc)):
             impr_label = np.array(self.labels[index], dtype="int32")
             impr_news = np.array(self.imprs[index], dtype="int32")
 
