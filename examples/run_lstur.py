@@ -50,7 +50,7 @@ if not os.path.exists(yaml_file):
                                os.path.join(data_path, 'utils'), mind_utils)
 
 hparams = prepare_hparams(yaml_file, wordEmb_file=wordEmb_file, \
-                          wordDict_file=wordDict_file, userDict_file=userDict_file, batch_size=32, \ 
+                          wordDict_file=wordDict_file, userDict_file=userDict_file, batch_size=32, \
                           epochs=epochs,
                           show_step=10)
 print("[LSTUR] Config,", hparams)
