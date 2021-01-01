@@ -30,7 +30,7 @@ data_path = "./test_mind"
 wordEmb_file = os.path.join(data_path, "utils", "embedding.npy")
 userDict_file = os.path.join(data_path, "utils", "uid2index.pkl")
 wordDict_file = os.path.join(data_path, "utils", "word_dict.pkl")
-yaml_file = os.path.join(data_path, "utils", r'npa.yaml')
+yaml_file = os.path.join(data_path, "utils", r'nrms.yaml')
 model_dir = os.path.join(data_path, "nrms")
 
 
