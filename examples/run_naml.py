@@ -10,7 +10,7 @@ sys.path.append("../")
 from reco_utils.recommender.deeprec.deeprec_utils import download_deeprec_resources
 from reco_utils.recommender.newsrec.newsrec_utils import prepare_hparams
 from reco_utils.recommender.newsrec.models.naml import NAMLModel
-from reco_utils.recommender.newsrec.io.mind_iterator import MINDAllIterator
+from reco_utils.recommender.newsrec.io.mind_all_iterator import MINDAllIterator
 from reco_utils.recommender.newsrec.newsrec_utils import get_mind_data_set
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
