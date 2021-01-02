@@ -150,7 +150,6 @@ class MINDAllIterator(BaseIterator):
                     label = [0 for _ in impr.split()]
                 else:
                     label = [int(i.split("-")[1]) for i in impr.split()]
-                label = [int(i.split("-")[1]) for i in impr.split()]
                 uindex = self.uid2index[uid] if uid in self.uid2index else 0
 
                 self.histories.append(history)

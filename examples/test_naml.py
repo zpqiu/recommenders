@@ -27,7 +27,7 @@ MIND_type = 'large'
 
 data_path = "./test_mind"
 
-wordEmb_file = os.path.join(data_path, "utils", "embedding.npy")
+wordEmb_file = os.path.join(data_path, "utils", "embedding_all.npy")
 userDict_file = os.path.join(data_path, "utils", "uid2index.pkl")
 wordDict_file = os.path.join(data_path, "utils", "word_dict_all.pkl")
 vertDict_file = os.path.join(data_path, "utils", "vert_dict.pkl")
@@ -44,7 +44,6 @@ hparams = prepare_hparams(yaml_file,
                           vertDict_file=vertDict_file, 
                           subvertDict_file=subvertDict_file,
                           batch_size=128,
-                          epochs=epochs,
                           show_step=10)
 
 
@@ -55,7 +54,7 @@ def dist_eval(args):
     test_news_file = os.path.join(data_path, "valid", 'news.tsv')
     test_behaviors_file = os.path.join(data_path, "valid", 'behaviors.{}.tsv'.format(args.fsplit))
 
-    group_impr_indexes, group_labels, group_preds = model.run_slow_eval(test_news_file, test_behaviors_file)
+    group_impr_indexes, group_labels, group_preds = model.run_fast_eval(test_news_file, test_behaviors_file)
 
     with open(os.path.join(data_path, 'results/naml-valid-prediction.{}.txt'.format(args.fsplit)), 'w') as f:
         for labels, preds in tqdm(zip(group_labels, group_preds)):
@@ -71,7 +70,7 @@ def test(args):
     test_news_file = os.path.join(data_path, "test", 'news.tsv')
     test_behaviors_file = os.path.join(data_path, "test", 'behaviors.{}.tsv'.format(args.fsplit))
 
-    group_impr_indexes, group_labels, group_preds = model.run_slow_eval(test_news_file, test_behaviors_file)
+    group_impr_indexes, group_labels, group_preds = model.run_fast_eval(test_news_file, test_behaviors_file)
 
     with open(os.path.join(data_path, 'results/naml-test-prediction.{}.txt'.format(args.fsplit)), 'w') as f:
         for impr_index, preds in tqdm(zip(group_impr_indexes, group_preds)):
